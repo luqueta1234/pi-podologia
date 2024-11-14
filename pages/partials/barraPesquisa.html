@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pesquisa por CPF ou ID</title>
+  <!-- Inclusão do Bootstrap via CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    /* Centralizar o conteúdo vertical e horizontal */
+    body, html {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f8f9fa;
+    }
+    .search-container {
+      text-align: center;
+      width: 100%;
+    }
+    .input-group {
+      max-width: 800px; /* Limitar a largura do grupo de inputs */
+      margin: 0 auto; /* Centraliza o grupo de inputs */
+    }
+    .input-group .form-select {
+      width: 167px; /* Largura do campo de seleção */
+    }
+    .input-group .form-control {
+      width: calc(60% - 160px); /* Preenche o restante do espaço disponível */
+    }
+    .input-group .btn {
+      width: 120px; /* Ajusta a largura do botão */
+      height: 100%; /* Faz o botão ficar alinhado com os campos de input */
+    }
+    .input-group .form-select,
+    .input-group .form-control,
+    .input-group .btn {
+      border-radius: 0.375rem; /* Deixa os campos arredondados */
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1><center>Pesquisar por Paciente<center></h1>
+    <br><br>
+    <div class="search-container">
+      <form id="searchForm" action="/pesquisar" method="GET">
+        <!-- Escolher o tipo de pesquisa -->
+        <div class="input-group mb-3">
+          <select id="searchType" class="form-select" name="tipo" required>
+            <option value="" disabled selected>Selecione uma opção</option>
+            <option value="cpf">CPF</option>
+            <option value="id">ID</option>
+          </select>
+          
+          <!-- Campo de entrada (inicialmente desabilitado) -->
+          <input id="searchValue" type="text" class="form-control" placeholder="" name="valor" required disabled>
+
+          <!-- Botão de pesquisa -->
+          <button class="btn btn-primary" type="submit">Pesquisar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Inclusão do JavaScript do Bootstrap -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Função de validação
+    document.getElementById('searchForm').addEventListener('submit', function(event) {
+      const searchType = document.getElementById('searchType').value;
+      const searchValue = document.getElementById('searchValue').value;
+
+      if (!searchValue.trim()) {
+        alert('Por favor, insira um número para buscar.');
+        event.preventDefault(); // Impede o envio do formulário
+        return;
+      }
+
+      if (searchType === 'cpf') {
+        // Remove tudo que não for número
+        const cpf = searchValue.replace(/\D/g, '');
+        
+        // Verifica se o CPF tem exatamente 11 dígitos
+        if (cpf.length !== 11) {
+          alert('Por favor, insira um CPF válido com 11 dígitos.');
+          event.preventDefault(); // Impede o envio do formulário
+        } else if (!/^\d{11}$/.test(cpf)) {
+          alert('O CPF deve conter apenas números.');
+          event.preventDefault(); // Impede o envio do formulário
+        }
+      } else if (searchType === 'id') {
+        // Para ID, deve ser somente números e não pode ultrapassar 10 caracteres
+        const id = searchValue.replace(/\D/g, ''); // Remove tudo que não for número
+        
+        // Verifica se o ID tem no máximo 10 dígitos
+        if (id.length > 10) {
+          alert('O ID pode ter no máximo 10 dígitos.');
+          event.preventDefault(); // Impede o envio do formulário
+        } else if (!/^\d{1,10}$/.test(id)) {
+          alert('O ID deve conter apenas números.');
+          event.preventDefault(); // Impede o envio do formulário
+        }
+      }
+    });
+
+    // Evento para validar dinamicamente conforme a seleção
+    document.getElementById('searchType').addEventListener('change', function() {
+      const searchType = this.value;
+      const searchInput = document.getElementById('searchValue');
+      
+      // Limpa o campo ao trocar a seleção
+      searchInput.value = '';
+      
+      if (searchType === 'cpf') {
+        searchInput.removeAttribute('disabled'); // Habilita o campo
+        searchInput.setAttribute('maxlength', '11'); // Limita o número de caracteres para CPF
+        searchInput.setAttribute('pattern', '\\d{11}'); // Padrão de CPF (apenas números)
+        searchInput.placeholder = 'Digite o CPF';
+      } else if (searchType === 'id') {
+        searchInput.removeAttribute('disabled'); // Habilita o campo
+        searchInput.setAttribute('maxlength', '10'); // Limita o número de caracteres para ID
+        searchInput.setAttribute('pattern', '\\d{1,10}'); // Padrão para ID (apenas números)
+        searchInput.placeholder = 'Digite o ID';
+      } else {
+        searchInput.setAttribute('disabled', 'disabled'); // Desabilita o campo se nenhuma opção for selecionada
+        searchInput.placeholder = 'Selecione um tipo de pesquisa primeiro';
+      }
+    });
+
+    // Adiciona um ouvinte de evento para permitir apenas números no campo
+    document.getElementById('searchValue').addEventListener('input', function(event) {
+      // Remove tudo que não for número
+      event.target.value = event.target.value.replace(/\D/g, '');
+    });
+  </script>
+</body>
+</html>
